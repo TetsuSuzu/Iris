@@ -1,16 +1,15 @@
-承知しました。では、以下の前提（デフォルト仮定）で Azure Pricing Calculator ベースの精緻見積りを作成し、項目ごとの単価（USD/月）と合計を示します。最後に 1 USD = ¥150 換算の日本円金額も併記します。精度はラフ（±20〜30%）ですが、公開オンデマンド料金を基に算出しています。予約適用やリージョン差・為替で変動します。なお、表示は見やすさ優先でテキスト表形式で提示します。
+Azure Pricing Calculator ベースの精緻見積
 
-前提（確定）
+前提
 - リージョン：東日本
 - OS：Linux（RHEL/CentOS 想定、追加 OS ライセンス無し）
 - 稼働時間：730 時間/月（24×7）
 - DR：常時フル稼働（今回はフル稼働前提）
 - Application Gateway：v2（WAF OFF）
 - Log Analytics：100 GB/月（標準仮定）
-- バックアップ保存：2 TB（RA-GRS Blob）
+- バックアップ保存：2 TB（RA-GRS Blob）Read-access Geo-Rudandant-storage)
 - 為替：1 USD = ¥150
 
-（注）価格はオンデマンド公開価格の代表値を用いた概算。Azure の細かな課金要素（従量転送量や Application Gateway の処理ユニット数、スループット時間別課金など）は概算処理で反映しています。正確な見積は実際の Azure Pricing Calculator の直接エクスポートが最も正確です。
 
 1) リソース構成（台数まとめ）
 - プライマリ（リージョンA）
@@ -25,8 +24,7 @@
   - DB-DR-Primary/Backup (Standard_DS13_v2 相当) : 2 台
 - 合計 VM 台数（常時稼働）: 15 台
 
-2) 単価前提（代表的な月額換算値、オンデマンド、730h/月）
-（※実際のリージョン価格は Azure 公式に準じます。以下は代表目安）
+2) 単価前提 オンデマンド、730h/月
 - Standard_DS3_v2 : 1 台あたり 約 300 USD / 月
 - Standard_DS4_v2 : 1 台あたり 約 600 USD / 月
 - Standard_DS13_v2 : 1 台あたり 約 1,200 USD / 月
@@ -35,16 +33,16 @@
 - Premium Managed Disk:
   - P30 (1 TiB) : 約 180 USD / 月
   - P20 (512 GiB) : 約 100 USD / 月
-- Application Gateway (v2, WAF OFF) : 固定費 + 処理量で目安 約 800 USD / 月（中〜高トラフィック向け）
+- Application Gateway (v2, WAF OFF) : 約 800 USD / 月（中〜高トラフィック向け）
 - Traffic Manager : 約 50 USD / 月
 - Public IP / Load Balancer / ILB 等小口合計：約 200 USD / 月
 - Log Analytics: 100 GB/月 想定で 約 300 USD / 月
 - Backup (Snapshot/Blob, 2 TB RA-GRS) : 約 400 USD / 月
 - Automation / Runbooks / その他運用ツール: 約 200 USD / 月
-- サポート/管理（基礎的）: 約 300 USD / 月
+- サポート: 約 300 USD / 月
 
 3) 項目別内訳（USD/月）および日本円換算（¥150/USD）
-（表は「項目 | 台数 | 単価 (USD/月) | 小計 (USD/月) | 小計 (JPY/月)」形式）
+（「項目 | 台数 | 単価 (USD/月) | 小計 (USD/月) | 小計 (JPY/月)」形式）
 
 - Compute (VM)
   - Web (Standard_DS3_v2) | 台数 4 (2 Active + 2 DR) | 単価 300 | 小計 1,200 USD | ¥180,000
@@ -87,25 +85,7 @@
 - USD 合計 = Compute 9,720 + Storage 1,270 + Network 1,050 + Ops 800 = 12,840 USD / 月
 - JPY 合計 = 12,840 × 150 = ¥1,926,000 / 月
 
-見積（確定）
+見積
 - 月額合計（オンデマンド・東日本・WAF OFF・DR 常時起動）：
   - USD: 約 12,840 USD / 月
   - JPY: 約 ¥1,926,000 / 月
-
-推定誤差
-- 想定誤差（ラフ）: ±20〜30%（約 ¥1.35M ～ ¥2.5M の範囲が想定）
-
-オプション試算（簡易）
-- Application Gateway WAF ON にした場合：+ 約 500 – 1,000 USD / 月（構成/トラフィックにより）
-  - 例：AGW WAF ON で +700 USD → +¥105,000 / 月
-- 予約インスタンス（1年/3年）を適用した場合：
-  - VM コストを平均 30–45% 削減可能。仮に 40% 削減した場合の差分概算：
-    - Compute 現状 USD 9,720 → 削減後 5,832 USD（差分 3,888 USD 節約）
-    - 合計 USD 12,840 → 8,952 USD（JPY 約 ¥1,342,800 / 月）
-- DR を縮退（待機最小構成）にすると月額さらに数十 % 削減可能（DR 側 VM を停止/最小化する運用により）
-
-注意事項・想定外コスト
-- データ転送量（アウトバウンド帯域）や Application Gateway のデータ処理量による従量課金は今回概算に含めていますが、実トラフィックにより増減します。高トラフィック環境ではネットワーク費用が大きくなる点にご留意ください。
-- InterSystems ライセンス費用（製品ライセンス）は含まれていません。別途見積りが必要です。
-- Azure サポートプラン（Professional Direct など）や運用代行費用は実業務レベルでは別途必要となります。
-- 実際の正確な見積（請求想定）は Azure Pricing Calculator を用いて入念にパラメータを設定したエクスポートが推奨です。ご希望であれば
